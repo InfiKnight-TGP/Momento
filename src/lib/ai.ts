@@ -7,68 +7,107 @@ const vertexai = new VertexAI({
 })
 
 const model = vertexai.getGenerativeModel({
-  model: 'gemini-1.5-pro',
+  model: 'gemini-2.5-flash',
 })
 
-export async function analyzeMemory(imageUrl: string, story: string): Promise<AIInsights> {
-  const prompt = `
-    Analyze this photo and story to extract meaningful insights. Return a JSON object with the following structure:
+export interface EnhancedAIInsights extends AIInsights {
+  title: string
+  description: string
+}
 
-    {
-      "emotions": ["array", "of", "emotions", "felt"],
-      "people": [{"name": "person", "relationship": "family/friend/colleague/etc"}],
-      "themes": ["array", "of", "life", "themes"],
-      "locations": ["array", "of", "places", "mentioned"],
-      "events": ["array", "of", "events", "that", "occurred"],
-      "keywords": ["array", "of", "important", "keywords"]
-    }
+export async function analyzeMemory(imageUrl: string, story: string): Promise<EnhancedAIInsights> {
+  const prompt = `You are a poetic postcard writer. Analyze this photo and personal story, then create:
 
-    Story: "${story}"
+1. A SHORT CATCHY TITLE (max 6 words) - like vintage postcards: "Greetings from Paris!" or "A Perfect Sunset Moment"
+2. A HANDWRITTEN NOTE MESSAGE (2-3 sentences) - poetic, warm, personal, like writing on the back of a vintage postcard
 
-    Focus on the emotional context, relationships, and personal meaning. Extract themes like family, health, nature, celebrations, etc. Identify emotions explicitly expressed or implied.
-  `
+Return ONLY this exact JSON:
+{
+  "title": "Catchy Postcard Title Here",
+  "description": "A warm, poetic 2-3 sentence message capturing the essence and emotion of this moment, written like a vintage postcard note.",
+  "emotions": ["emotion1", "emotion2", "emotion3"],
+  "people": [{"name": "person", "relationship": "relationship"}],
+  "themes": ["theme1", "theme2"],
+  "locations": ["location1"],
+  "events": ["event"],
+  "keywords": ["keyword1", "keyword2"]
+}
+
+Photo and Story: "${story}"
+
+IMPORTANT:
+- Title should feel timeless and poetic
+- Description should be personal, warm, and meaningful
+- Capture what makes this moment special
+- Make it feel like a real memory worth keeping`;
 
   try {
-    const response = await model.generateContent([
-      {
-        text: prompt,
-      },
-      {
-        fileData: {
-          fileUri: imageUrl,
-          mimeType: 'image/jpeg',
+    // Fetch image and convert to base64
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image: ${response.statusText}`);
+    }
+    const arrayBuffer = await response.arrayBuffer();
+    const base64Image = Buffer.from(arrayBuffer).toString('base64');
+
+    // CRITICAL: Correct request format for Vertex AI
+    const request = {
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            {
+              inlineData: {
+                mimeType: 'image/jpeg',
+                data: base64Image,
+              },
+            },
+            {
+              text: prompt,
+            },
+          ],
         },
-      },
-    ])
+      ],
+    };
 
-    const result = response.response
-    const text = result.candidates?.[0]?.content?.parts?.[0]?.text || '{}'
+    console.log('Sending request to Gemini for postcard...');
+    const result = await model.generateContent(request);
+    console.log('Gemini response received');
+    
+    const text = result.response.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+    console.log('Gemini raw output:', text);
 
-    // Parse JSON from the response
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    // Parse JSON from response
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
-      return JSON.parse(jsonMatch[0])
+      const parsed = JSON.parse(jsonMatch[0]);
+      console.log('Parsed postcard insights:', parsed);
+      return parsed;
     }
 
-    // Fallback if JSON parsing fails
+    console.log('No valid JSON found in response, returning defaults');
+    // Fallback with default postcard values
     return {
+      title: 'A Cherished Memory',
+      description: 'A special moment captured and preserved in time.',
       emotions: [],
       people: [],
       themes: [],
       locations: [],
       events: [],
       keywords: [],
-    }
+    };
   } catch (error) {
-    console.error('AI analysis error:', error)
-    // Return empty insights on error
+    console.error('AI analysis error:', error);
     return {
+      title: 'A Cherished Memory',
+      description: 'A special moment captured and preserved in time.',
       emotions: [],
       people: [],
       themes: [],
       locations: [],
       events: [],
       keywords: [],
-    }
+    };
   }
 }

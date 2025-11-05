@@ -4,23 +4,18 @@ const storage = new Storage({
   projectId: process.env.GOOGLE_CLOUD_PROJECT,
 })
 
-const bucketName = process.env.GOOGLE_CLOUD_STORAGE_BUCKET || 'photo-journal-images'
-
 export async function uploadImage(file: File): Promise<string> {
-  const buffer = Buffer.from(await file.arrayBuffer())
-  const fileName = `memories/${Date.now()}-${file.name}`
-
-  const bucket = storage.bucket(bucketName)
-  const fileRef = bucket.file(fileName)
-
-  await fileRef.save(buffer, {
+  const bucket = storage.bucket(process.env.GOOGLE_CLOUD_STORAGE_BUCKET!)
+  const filename = `memories/${Date.now()}-${file.name.replace(/[^a-z0-9.-]/gi, '_')}`
+  
+  const fileObj = bucket.file(filename)
+  
+  const buffer = await file.arrayBuffer()
+  await fileObj.save(Buffer.from(buffer), {
     metadata: {
       contentType: file.type,
     },
   })
-
-  // Make the file publicly readable
-  await fileRef.makePublic()
-
-  return `https://storage.googleapis.com/${bucketName}/${fileName}`
+  
+  return `https://storage.googleapis.com/${bucket.name}/${filename}`
 }

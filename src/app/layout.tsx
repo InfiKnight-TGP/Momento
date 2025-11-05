@@ -1,12 +1,12 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'] })
-
 export const metadata: Metadata = {
-  title: 'Photo Journal - Your Memories, Your Story',
-  description: 'A digital photo journal where AI helps you understand the meaning behind your memories',
+  title: 'Momento - AI Memory Journal',
+  description: 'Combine your photos with personal stories. Let AI help you discover the deeper meaning behind your memories.',
+  icons: {
+    icon: '📖',
+  },
 }
 
 export default function RootLayout({
@@ -16,7 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body>{children}</body>
     </html>
   )
 }

@@ -1,29 +1,33 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
 model Memory {
   id          String   @id @default(cuid())
-  imageUrl    String   // Cloud Storage URL
-  story       String   // User's personal narrative
-  createdAt   DateTime @default(now())
-
-  // AI-extracted insights
-  emotions    Json?    // ["peaceful", "grateful", "concerned"]
-  people      Json?    // [{"name": "sister", "relationship": "family"}]
-  themes      Json?    // ["family", "health", "nature"]
-  locations   Json?    // ["beach", "favorite places"]
-  events      Json?    // ["difficult conversation", "milestone"]
+  imageUrl    String
+  story       String
+  
+  // AI-generated content
+  title       String?  @default("Untitled Memory")
+  description String?
+  
+  // AI-extracted insights (stored as JSON strings for SQLite)
+  emotions    String?
+  people      String?
+  themes      String?
+  locations   String?
+  events      String?
 
   // Search and discovery
-  embedding   String?  // For semantic search (future)
-  keywords    String?  // Comma-separated for simple search
+  embedding   String?
+  keywords    String?
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([createdAt])
 }

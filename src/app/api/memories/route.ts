@@ -16,26 +16,38 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Upload image to Cloud Storage
+    if (story.length < 50) {
+      return NextResponse.json(
+        { error: 'Story must be at least 50 characters' },
+        { status: 400 }
+      )
+    }
+
+    // Upload image
     const imageUrl = await uploadImage(image)
+    console.log('Image uploaded:', imageUrl)
 
-    // Analyze with AI
+    // Get AI insights (title + description + tags)
     const insights = await analyzeMemory(imageUrl, story)
+    console.log('AI insights:', insights)
 
-    // Save to database
+    // Save to database WITH title and description
     const memory = await prisma.memory.create({
       data: {
         imageUrl,
         story,
-        emotions: insights.emotions,
-        people: insights.people,
-        themes: insights.themes,
-        locations: insights.locations,
-        events: insights.events,
-        keywords: insights.keywords.join(', '),
+        title: insights.title || 'Untitled Memory',
+        description: insights.description || 'A special moment.',
+        emotions: JSON.stringify(insights.emotions || []),
+        people: JSON.stringify(insights.people || []),
+        themes: JSON.stringify(insights.themes || []),
+        locations: JSON.stringify(insights.locations || []),
+        events: JSON.stringify(insights.events || []),
+        keywords: insights.keywords?.join(', ') || null,
       },
     })
 
+    console.log('Memory created:', memory)
     return NextResponse.json({ success: true, memory })
   } catch (error) {
     console.error('Memory creation error:', error)
@@ -46,13 +58,31 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const memories = await prisma.memory.findMany({
-      orderBy: { createdAt: 'desc' },
-    })
+    const { searchParams } = new URL(request.url)
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = 20
 
-    return NextResponse.json({ success: true, memories })
+    const [memories, total] = await Promise.all([
+      prisma.memory.findMany({
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.memory.count(),
+    ])
+
+    return NextResponse.json({
+      success: true,
+      memories,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    })
   } catch (error) {
     console.error('Memories fetch error:', error)
     return NextResponse.json(

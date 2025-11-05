@@ -25,3 +25,46 @@ body {
     text-wrap: balance;
   }
 }
+
+/* ===== POSTCARD ANIMATIONS ===== */
+
+/* Import handwritten fonts */
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Dancing+Script:wght@400;700&display=swap');
+
+/* Perspective for 3D flip effects */
+.perspective {
+  perspective: 1000px;
+}
+
+/* Handwritten font classes */
+.handwritten {
+  font-family: 'Caveat', cursive;
+}
+
+.script {
+  font-family: 'Dancing Script', cursive;
+}
+
+/* Smooth transitions */
+* {
+  box-sizing: border-box;
+}
+
+/* Postcard lines background pattern */
+@supports (background-image: repeating-linear-gradient(
+  to bottom,
+  transparent,
+  transparent 23px,
+  rgba(0, 0, 0, 0.05) 23px,
+  rgba(0, 0, 0, 0.05) 24px
+)) {
+  .postcard-lines {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 23px,
+      rgba(0, 0, 0, 0.05) 23px,
+      rgba(0, 0, 0, 0.05) 24px
+    );
+  }
+}
