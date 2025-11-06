@@ -98,3 +98,22 @@ body {
 .shadow-3xl {
   box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.3);
 }
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Lora:ital,wght@0,400;0,700;1,400&display=swap');
+
+.font-handwriting {
+  font-family: 'Caveat', cursive;
+}
+
+.font-serif {
+  font-family: 'Lora', serif;
+}
+
+/* Smooth page turn perspective */
+.perspective-2000 {
+  perspective: 2000px;
+}
+
+/* Paper texture */
+body {
+  background-attachment: fixed;
+}

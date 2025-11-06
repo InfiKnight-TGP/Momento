@@ -1,33 +1,41 @@
 'use client'
 
+import { motion } from 'framer-motion'
+import { Plus } from 'lucide-react'
+
 interface BookmarkButtonProps {
   onClick: () => void
 }
 
 export default function BookmarkButton({ onClick }: BookmarkButtonProps) {
   return (
-    <button
+    <motion.button
+      whileHover={{ scale: 1.05, y: -5 }}
+      whileTap={{ scale: 0.95 }}
       onClick={onClick}
-      className="fixed top-6 right-6 z-40 group"
+      className="relative group"
       title="Add Memory"
     >
-      {/* Bookmark shape with + icon */}
-      <div className="relative w-16 h-24 bg-gradient-to-b from-blue-600 to-blue-700 rounded-b-lg shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center">
-        {/* Notch at top */}
-        <div className="absolute top-0 left-2 w-3 h-3 bg-blue-800 rounded-full"></div>
-        <div className="absolute top-0 right-2 w-3 h-3 bg-blue-800 rounded-full"></div>
+      {/* Bookmark shape */}
+      <div className="w-16 h-28 bg-gradient-to-b from-red-600 to-red-700 shadow-xl relative overflow-hidden">
+        {/* Notch at bottom */}
+        <div className="absolute -bottom-1 left-0 right-0 h-4 bg-red-700" style={{
+          clipPath: 'polygon(0 0, 50% 100%, 100% 0)'
+        }}></div>
 
-        {/* + Icon */}
-        <div className="text-white text-4xl font-bold">+</div>
+        {/* Gold ribbon detail */}
+        <div className="absolute top-2 left-2 right-2 h-1 bg-amber-400"></div>
 
-        {/* Ribbon effect */}
-        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-3 bg-blue-700 rounded-b-full"></div>
+        {/* Plus icon */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Plus className="w-8 h-8 text-white" />
+        </div>
       </div>
 
       {/* Hover tooltip */}
-      <div className="absolute top-full right-0 mt-2 bg-gray-900 text-white text-sm px-3 py-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-        Add Memory
+      <div className="absolute -left-28 top-1/2 -translate-y-1/2 bg-amber-900 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-xl">
+        Add New Memory
       </div>
-    </button>
+    </motion.button>
   )
 }
