@@ -114,20 +114,25 @@ export default function MemoryCard({ memory }: MemoryCardProps) {
             background: 'linear-gradient(135deg, #FFF8E7 0%, #F5E6D3 100%)'
           }}
         >
-          <div className="h-full p-12 flex flex-col">
-            {/* Quote Section - AI Generated Story */}
-            <div className="mb-6 pb-6 border-b-2 border-amber-700/20">
-              <p className="text-gray-800 text-base italic leading-relaxed font-serif line-clamp-4">
-                "{memory.story || memory.description}"
-              </p>
-            </div>
+          <div className="h-full p-10 flex flex-col overflow-y-auto">
+            {/* User Story - Top Section */}
+            {memory.description && (
+              <div className="mb-6 pb-6 border-b-2 border-amber-700/10 flex-shrink-0">
+                <p className="text-gray-700 text-sm leading-relaxed">
+                  <span className="font-semibold text-gray-800 block mb-2">Your story:</span>
+                  {memory.description}
+                </p>
+              </div>
+            )}
 
-            {/* User Input Description */}
-            <div className="mb-6 flex-shrink-0">
-              <p className="text-gray-700 text-sm leading-relaxed line-clamp-3">
-                {memory.description}
-              </p>
-            </div>
+            {/* AI Generated Story - In Quotes, Larger Font */}
+            {memory.story && (
+              <div className="mb-6 pb-6 border-b-2 border-amber-700/20 flex-shrink-0">
+                <p className="text-gray-800 text-base leading-relaxed font-serif italic">
+                  "{memory.story}"
+                </p>
+              </div>
+            )}
 
             {/* Bottom Section - Category and Date */}
             <div className="mt-auto space-y-4">

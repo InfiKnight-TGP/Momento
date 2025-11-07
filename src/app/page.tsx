@@ -2,12 +2,39 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
 import MemoryBook from '../components/MemoryBook'
+import Navbar from '../components/Navbar'
 
 export default function Home() {
   const [bookOpened, setBookOpened] = useState(false)
   const [showCover, setShowCover] = useState(true)
-  const [userName] = useState('Dinesh') // You can make this dynamic later
+  const { user, isLoading, isAuthenticated } = useAuth()
+  const router = useRouter()
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push('/login')
+    }
+  }, [isLoading, isAuthenticated, router])
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-rose-100 via-peach-100 to-amber-100 flex items-center justify-center">
+        <div className="text-2xl font-serif text-amber-900">Loading...</div>
+      </div>
+    )
+  }
+
+  // Don't render if not authenticated
+  if (!isAuthenticated || !user) {
+    return null
+  }
+
+  const userName = user.name || user.username
 
   const handleOpenBook = () => {
     setBookOpened(true)
@@ -15,9 +42,11 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-rose-100 via-peach-100 to-amber-100 flex items-center justify-center p-4 overflow-hidden relative">
-      {/* Subtle texture overlay */}
-      <div className="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuOSIgbnVtT2N0YXZlcz0iNCIgLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbm9pc2UpIiBvcGFjaXR5PSIwLjQiLz48L3N2Zz4=')]"></div>
+    <>
+      <Navbar />
+      <main className="min-h-screen bg-gradient-to-br from-rose-100 via-peach-100 to-amber-100 flex items-center justify-center p-4 overflow-hidden relative">
+        {/* Subtle texture overlay */}
+        <div className="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuOSIgbnVtT2N0YXZlcz0iNCIgLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbm9pc2UpIiBvcGFjaXR5PSIwLjQiLz48L3N2Zz4=')]"></div>
 
       <AnimatePresence mode="wait">
         {showCover && !bookOpened && (
@@ -119,5 +148,6 @@ export default function Home() {
         )}
       </AnimatePresence>
     </main>
+    </>
   )
 }
