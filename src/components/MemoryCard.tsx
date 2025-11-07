@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import Image from 'next/image'
-import { X, MapPin, Calendar, Sparkles } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 
 interface MemoryCardProps {
   memory: {
@@ -20,165 +20,154 @@ interface MemoryCardProps {
 }
 
 export default function MemoryCard({ memory }: MemoryCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [isFlipped, setIsFlipped] = useState(false)
 
-  let emotions = []
-  let locations = []
+  const formattedDate = new Date(memory.createdAt).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  })
 
-  try {
-    emotions = JSON.parse(memory.emotions || '[]')
-    locations = JSON.parse(memory.locations || '[]')
-  } catch (e) {}
+  // Parse comma-separated strings into arrays and remove brackets
+  const parseAndClean = (str: string) => {
+    if (!str) return []
+    // Remove square brackets and quotes, then split and clean
+    return str
+      .replace(/[\[\]"]/g, '') // Remove [, ], and "
+      .split(',')
+      .map(item => item.trim())
+      .filter(Boolean)
+  }
+
+  const emotions = parseAndClean(memory.emotions)
+  const themes = parseAndClean(memory.themes)
+  const locations = parseAndClean(memory.locations)
+
+  // Combine emotions and themes for top tags
+  const topTags = [...emotions, ...themes].slice(0, 2)
 
   return (
-    <>
-      {/* Card in Journal */}
+    <div 
+      className="relative w-[420px] h-[560px] cursor-pointer"
+      style={{ perspective: '1500px' }}
+      onClick={() => setIsFlipped(!isFlipped)}
+    >
       <motion.div
-        whileHover={{
-          scale: 1.02,
-          y: -5,
-          rotateZ: Math.random() * 2 - 1,
-          transition: { duration: 0.3 }
+        className="relative w-full h-full"
+        animate={{ rotateY: isFlipped ? 180 : 0 }}
+        transition={{ duration: 0.8, ease: [0.4, 0.0, 0.2, 1] }}
+        style={{ 
+          transformStyle: 'preserve-3d',
+          transformOrigin: 'center'
         }}
-        onClick={() => setIsExpanded(true)}
-        className="relative cursor-pointer group"
       >
-        {/* Polaroid-style photo */}
-        <div className="bg-white p-3 shadow-xl rounded-sm transform rotate-[-1deg] group-hover:rotate-0 transition-all duration-300">
-          {/* Photo */}
-          <div className="relative w-full aspect-[4/3] bg-gray-100 overflow-hidden">
+        {/* Card Front - Magazine Style with Image */}
+        <div
+          className="absolute w-full h-full rounded-3xl shadow-2xl overflow-hidden"
+          style={{
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+          }}
+        >
+          {/* Background Image with Overlay */}
+          <div className="relative w-full h-full">
             <Image
               src={memory.imageUrl}
               alt={memory.title}
               fill
               className="object-cover"
             />
-
-            {/* Hover overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
-              <p className="text-white text-sm font-medium flex items-center gap-2">
-                <Sparkles className="w-4 h-4" />
-                Click to read
-              </p>
-            </div>
+            {/* Dark gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/70"></div>
           </div>
 
-          {/* Caption area */}
-          <div className="mt-3 text-center">
-            <p className="text-sm font-handwriting text-gray-800 line-clamp-1">
+          {/* Top Tags */}
+          <div className="absolute top-8 left-8 flex gap-3 z-10">
+            {topTags.map((tag, index) => (
+              <span
+                key={index}
+                className="px-5 py-2 bg-blue-500/80 backdrop-blur-sm text-white text-sm font-medium rounded-full"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          {/* Bottom Content */}
+          <div className="absolute bottom-0 left-0 right-0 p-8 z-10">
+            <h2 className="text-white text-4xl font-bold mb-4 leading-tight">
               {memory.title}
+            </h2>
+            <p className="text-white/90 text-base flex items-center gap-2">
+              Click to read the story <span className="text-xl">→</span>
             </p>
-            {emotions.length > 0 && (
-              <p className="text-xs text-gray-500 mt-1">
-                {emotions.slice(0, 2).join(', ')}
-              </p>
-            )}
           </div>
         </div>
 
-        {/* Tape pieces for authentic scrapbook feel */}
-        <div className="absolute -top-2 left-8 w-16 h-6 bg-amber-100/60 backdrop-blur-sm rotate-[-5deg] shadow-sm"></div>
-        <div className="absolute -top-2 right-8 w-16 h-6 bg-amber-100/60 backdrop-blur-sm rotate-[5deg] shadow-sm"></div>
-      </motion.div>
+        {/* Card Back - Story Card */}
+        <div
+          className="absolute w-full h-full rounded-3xl shadow-2xl overflow-hidden"
+          style={{
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+            transform: 'rotateY(180deg)',
+            background: 'linear-gradient(135deg, #FFF8E7 0%, #F5E6D3 100%)'
+          }}
+        >
+          <div className="h-full p-12 flex flex-col">
+            {/* Quote Section - AI Generated Story */}
+            <div className="mb-6 pb-6 border-b-2 border-amber-700/20">
+              <p className="text-gray-800 text-base italic leading-relaxed font-serif line-clamp-4">
+                "{memory.story || memory.description}"
+              </p>
+            </div>
 
-      {/* Expanded View Modal */}
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setIsExpanded(false)}
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.9, rotateY: -20 }}
-              animate={{ scale: 1, rotateY: 0 }}
-              exit={{ scale: 0.9, rotateY: 20 }}
-              transition={{ type: "spring", damping: 25 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-amber-50 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-8 relative"
-            >
-              {/* Close button */}
-              <button
-                onClick={() => setIsExpanded(false)}
-                className="absolute top-4 right-4 bg-white hover:bg-gray-100 p-2 rounded-full shadow-lg transition-colors z-10"
-              >
-                <X className="w-6 h-6 text-gray-700" />
-              </button>
+            {/* User Input Description */}
+            <div className="mb-6 flex-shrink-0">
+              <p className="text-gray-700 text-sm leading-relaxed line-clamp-3">
+                {memory.description}
+              </p>
+            </div>
 
-              {/* Content */}
-              <div className="space-y-6">
-                {/* Large photo */}
-                <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-xl">
-                  <Image
-                    src={memory.imageUrl}
-                    alt={memory.title}
-                    fill
-                    className="object-cover"
-                  />
+            {/* Bottom Section - Category and Date */}
+            <div className="mt-auto space-y-4">
+              {/* Category Tags */}
+              {locations.length > 0 && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <MapPin className="w-4 h-4 text-pink-500" />
+                  <span className="text-gray-700 font-medium text-sm">
+                    {locations.join(', ')}
+                  </span>
                 </div>
+              )}
 
-                {/* Title */}
-                <h2 className="text-3xl font-serif font-bold text-amber-900">
-                  {memory.title}
-                </h2>
-
-                {/* AI Description */}
-                <div className="bg-white/50 rounded-lg p-6 border-2 border-amber-200">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Sparkles className="w-5 h-5 text-amber-600" />
-                    <span className="text-sm font-semibold text-amber-800">AI-Generated Story</span>
-                  </div>
-                  <p className="text-gray-800 italic leading-relaxed font-serif">
-                    "{memory.description}"
-                  </p>
-                </div>
-
-                {/* Original Story */}
-                <div>
-                  <h3 className="text-lg font-semibold text-amber-900 mb-2">Your Story</h3>
-                  <p className="text-gray-700 leading-relaxed">{memory.story}</p>
-                </div>
-
-                {/* Metadata */}
-                <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                  {locations.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-amber-600" />
-                      <span>{locations.join(', ')}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-amber-600" />
-                    <span>
-                      {new Date(memory.createdAt).toLocaleDateString('en-US', {
-                        month: 'long',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
+              {/* Theme Pills */}
+              {themes.length > 0 && (
+                <div className="flex gap-2 flex-wrap">
+                  {themes.map((theme, index) => (
+                    <span
+                      key={index}
+                      className="px-4 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full"
+                    >
+                      {theme}
                     </span>
-                  </div>
+                  ))}
                 </div>
+              )}
 
-                {/* Emotion tags */}
-                {emotions.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {emotions.map((emotion: string, i: number) => (
-                      <span
-                        key={i}
-                        className="bg-amber-200 text-amber-900 px-3 py-1 rounded-full text-sm font-medium"
-                      >
-                        {emotion}
-                      </span>
-                    ))}
-                  </div>
-                )}
+              {/* Date */}
+              <div className="text-gray-600 text-base">
+                {formattedDate}
               </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+
+              {/* Flip Back Text */}
+              <div className="text-gray-500 text-sm flex items-center gap-2 pt-2">
+                <span className="text-lg">←</span> Click to flip back
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </div>
   )
 }

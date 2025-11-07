@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import MemoryBook from '@/components/MemoryBook'
+import MemoryBook from '../components/MemoryBook'
 
 export default function Home() {
   const [bookOpened, setBookOpened] = useState(false)

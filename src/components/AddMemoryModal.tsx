@@ -70,9 +70,9 @@ export default function AddMemoryModal({ isOpen, onClose, onSuccess }: AddMemory
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl my-8 overflow-hidden border-4 border-purple-100">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto my-8 border-4 border-purple-100">
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-6 text-white relative overflow-hidden">
+        <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-6 text-white relative overflow-hidden sticky top-0 z-10">
           <div className="absolute inset-0 opacity-10">
             <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
           </div>
@@ -100,11 +100,11 @@ export default function AddMemoryModal({ isOpen, onClose, onSuccess }: AddMemory
               Upload Your Photo
             </label>
             {preview ? (
-              <div className="relative rounded-2xl overflow-hidden border-4 border-purple-200">
+              <div className="relative w-full h-64 rounded-2xl overflow-hidden border-4 border-purple-200 shadow-lg">
                 <img
                   src={preview}
                   alt="Preview"
-                  className="w-full h-80 object-cover"
+                  className="w-full h-full object-cover"
                 />
                 <button
                   type="button"
@@ -112,21 +112,26 @@ export default function AddMemoryModal({ isOpen, onClose, onSuccess }: AddMemory
                     setImage(null)
                     setPreview('')
                   }}
-                  className="absolute top-4 right-4 bg-red-500 hover:bg-red-600 text-white p-3 rounded-full shadow-lg transition"
+                  className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg transition-all transform hover:scale-110"
                 >
                   <X size={20} />
                 </button>
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent text-white p-3 text-sm font-medium">
+                  ✓ Image selected
+                </div>
               </div>
             ) : (
-              <label className="border-4 border-dashed border-purple-300 rounded-2xl p-12 text-center cursor-pointer hover:border-purple-500 hover:bg-purple-50 transition-all group">
-                <div className="flex flex-col items-center gap-4">
-                  <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Upload className="w-10 h-10 text-purple-600" />
+              <label className="group relative flex flex-col items-center justify-center w-full h-64 border-4 border-dashed border-purple-300 rounded-2xl cursor-pointer transition-all duration-300 shadow-lg hover:border-purple-500 hover:shadow-xl bg-gradient-to-br from-purple-50 via-pink-50 to-purple-50">
+                <div className="flex flex-col items-center justify-center p-8">
+                  <div className="mb-6 p-5 bg-purple-200 rounded-full transition-all duration-300 group-hover:bg-purple-300 group-hover:scale-110">
+                    <Upload size={40} className="text-purple-600 group-hover:text-purple-700" />
                   </div>
-                  <div>
-                    <p className="text-lg font-bold text-gray-900">Drop your photo here</p>
-                    <p className="text-sm text-gray-600 mt-1">or click to browse</p>
-                    <p className="text-xs text-gray-500 mt-2">JPG, PNG, GIF, WebP (max 10MB)</p>
+                  <p className="mb-2 text-xl font-bold text-gray-800">📸 Drop your photo here</p>
+                  <p className="text-base text-gray-600 font-medium mb-3">or click to browse</p>
+                  <div className="flex items-center gap-2 text-xs text-gray-500 bg-white/50 px-4 py-2 rounded-full">
+                    <span>✓ JPG, PNG, GIF, WebP</span>
+                    <span className="text-gray-300">•</span>
+                    <span>Max 10MB</span>
                   </div>
                 </div>
                 <input
