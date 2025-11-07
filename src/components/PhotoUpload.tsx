@@ -69,46 +69,40 @@ export default function PhotoUpload({ onImageSelect, selectedImage, onImageRemov
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`
-        relative border-2 border-dashed rounded-lg p-8 text-center transition-colors
-        ${isDragging
-          ? 'border-blue-500 bg-blue-50'
-          : 'border-gray-300 hover:border-gray-400 bg-white'
-        }
-      `}
+      className={`group relative flex flex-col items-center justify-center w-full h-64 border-4 border-dashed rounded-2xl cursor-pointer transition-all duration-300 shadow-lg ${
+        isDragging
+          ? 'border-purple-600 bg-purple-100 scale-[1.02] shadow-2xl'
+          : 'border-purple-300 bg-gradient-to-br from-purple-50 via-pink-50 to-purple-50 hover:border-purple-500 hover:shadow-xl'
+      }`}
     >
-      <input
-        type="file"
-        accept="image/*"
-        onChange={handleFileSelect}
-        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-      />
-
-      <div className="flex flex-col items-center space-y-4">
-        <div className={`
-          p-4 rounded-full transition-colors
-          ${isDragging ? 'bg-blue-100' : 'bg-gray-100'}
-        `}>
+      <div className="flex flex-col items-center justify-center p-8">
+        <div className={`mb-6 p-5 rounded-full transition-all duration-300 ${
+          isDragging 
+            ? 'bg-purple-600 scale-110' 
+            : 'bg-purple-200 group-hover:bg-purple-300 group-hover:scale-110'
+        }`}>
           {isDragging ? (
-            <Upload className="w-8 h-8 text-blue-500" />
+            <Upload size={40} className="text-white animate-bounce" />
           ) : (
-            <ImageIcon className="w-8 h-8 text-gray-400" />
+            <ImageIcon size={40} className="text-purple-600 group-hover:text-purple-700" />
           )}
         </div>
-
-        <div>
-          <p className="text-lg font-medium text-gray-700">
-            {isDragging ? 'Drop your photo here' : 'Upload a photo'}
-          </p>
-          <p className="text-sm text-gray-500 mt-1">
-            Drag and drop or click to browse
-          </p>
-        </div>
-
-        <div className="text-xs text-gray-400">
-          Supports: JPG, PNG, GIF, WebP (max 10MB)
+        <p className="mb-2 text-xl font-bold text-gray-800">
+          {isDragging ? '📤 Release to upload' : '📸 Drop your photo here'}
+        </p>
+        <p className="text-base text-gray-600 font-medium mb-3">or click to browse</p>
+        <div className="flex items-center gap-2 text-xs text-gray-500 bg-white/50 px-4 py-2 rounded-full">
+          <span>✓ JPG, PNG, GIF, WebP</span>
+          <span className="text-gray-300">•</span>
+          <span>Max 10MB</span>
         </div>
       </div>
+      <input
+        type="file"
+        className="hidden"
+        accept="image/*"
+        onChange={handleFileSelect}
+      />
     </div>
   )
 }
